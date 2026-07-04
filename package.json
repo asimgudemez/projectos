@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "regression": "node scripts/regression-full.mjs",
+    "regression:documents": "node scripts/regression-documents-upload.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

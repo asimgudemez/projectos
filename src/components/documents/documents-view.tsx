@@ -5,6 +5,7 @@ import { FileText, Search } from "lucide-react";
 
 import { getDocumentsLibrary } from "@/lib/documents/documents-data";
 import { onImportComplete } from "@/lib/import/import-events";
+import { loadImportBatches } from "@/lib/import/import-store";
 import {
   executeExcelImport,
   getWorkbookStats,
@@ -23,15 +24,30 @@ import {
 import { ImportRowPreview } from "@/components/import/import-row-preview";
 import { ImportSheetPreview } from "@/components/import/import-sheet-preview";
 import { ImportSuccessToast } from "@/components/import/import-success-toast";
-import { ImportUploadTrigger } from "@/components/import/import-upload-zone";
+import { ImportUploadTrigger, ImportUploadZone } from "@/components/import/import-upload-zone";
 
 const DEFAULT_PROJECT_ID = "amaala";
+
+function getLatestImportState(): { workbook: ParsedWorkbook | null; batch: ImportBatch | null } {
+  if (typeof window === "undefined") {
+    return { workbook: null, batch: null };
+  }
+  const latest = loadImportBatches(DEFAULT_PROJECT_ID)[0];
+  return {
+    workbook: latest?.workbook ?? null,
+    batch: latest ?? null,
+  };
+}
 
 export function DocumentsView() {
   const [documents, setDocuments] = useState(() => getDocumentsLibrary());
   const [search, setSearch] = useState("");
-  const [workbook, setWorkbook] = useState<ParsedWorkbook | null>(null);
-  const [lastBatch, setLastBatch] = useState<ImportBatch | null>(null);
+  const [workbook, setWorkbook] = useState<ParsedWorkbook | null>(
+    () => getLatestImportState().workbook
+  );
+  const [lastBatch, setLastBatch] = useState<ImportBatch | null>(
+    () => getLatestImportState().batch
+  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
@@ -45,6 +61,11 @@ export function DocumentsView() {
   useEffect(() => {
     return onImportComplete((detail) => {
       refreshDocuments();
+      const latest = loadImportBatches(DEFAULT_PROJECT_ID)[0];
+      if (latest?.workbook) {
+        setWorkbook(latest.workbook);
+        setLastBatch(latest);
+      }
       setToastMessage("Import successful");
       setToastDetail(
         `${detail.totalRecords} records imported from ${detail.fileName}`
@@ -121,6 +142,17 @@ export function DocumentsView() {
         <div className="rounded-lg bg-rose-500/[0.08] px-4 py-3 text-sm text-rose-300 ring-1 ring-rose-500/20">
           {error}
         </div>
+      ) : null}
+
+      {!workbook ? (
+        <ImportUploadZone
+          onFileSelected={handleFileSelected}
+          onInvalidFile={() =>
+            setError("Please select a valid Excel file (.xlsx or .xls).")
+          }
+          isProcessing={isProcessing}
+          buttonLabel="Upload Excel"
+        />
       ) : null}
 
       {workbook ? (

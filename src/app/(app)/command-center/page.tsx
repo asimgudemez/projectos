@@ -9,6 +9,7 @@ import {
   MorningBrief,
   WorkspaceHeader,
 } from "@/components/command-center/workspace-header";
+import { ImportedActionsSection } from "@/components/command-center/imported-actions-section";
 
 export const metadata = {
   title: "Command Center",
@@ -31,6 +32,7 @@ export default function CommandCenterPage() {
         </div>
 
         <ProjectStatusStrip />
+        <ImportedActionsSection />
         <OperationsGrid />
         <ScheduleToday />
         <CommandInput />

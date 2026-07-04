@@ -5,6 +5,13 @@ import {
   type AiPortfolioContext,
   type AiProjectContext,
 } from "@/lib/ai-assistant-data";
+import { resolveProjectId } from "@/lib/data/adapters/mock/fixtures/ids";
+import {
+  getImportedActionsStats,
+  getTopImportedRisks,
+  groupPendingByOwner,
+  type ImportedActionView,
+} from "@/lib/insights/imported-actions";
 import { getProjectById } from "@/lib/projects-data";
 import { getProjectWorkspace } from "@/lib/project-workspace-data";
 import { getEngineeringData } from "@/lib/engineering-data";
@@ -236,6 +243,141 @@ function buildAreaDrawingsResponse(ctx: AiProjectContext): AiGeneratedResponse {
   };
 }
 
+function actionRef(action: ImportedActionView): AiDataReference {
+  const owner = action.responsibleParty ?? "Unassigned";
+  const due = action.dueDate ? `Due ${action.dueDate}` : "No due date";
+  return ref(
+    "Action",
+    action.reference,
+    action.title,
+    `${action.status} · ${action.priority} · ${owner} · ${due}`
+  );
+}
+
+function formatActionLine(action: ImportedActionView): string {
+  const owner = action.responsibleParty ?? "Unassigned";
+  const due = action.dueDate ? `due ${action.dueDate}` : "no due date";
+  const flags = [
+    action.isOverdue ? "OVERDUE" : null,
+    action.isHighPriority ? `${action.priority} priority` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  return `• **${action.reference}** — ${action.title}. ${action.status}, ${due}, owner: ${owner}${flags ? ` (${flags})` : ""}${action.remarks ? `. ${action.remarks}` : ""}`;
+}
+
+function buildOverdueActionsResponse(ctx: AiProjectContext): AiGeneratedResponse {
+  const overdue = ctx.importedActions.actions.filter((action) => action.isOverdue);
+  const references = overdue.map(actionRef);
+
+  if (overdue.length === 0) {
+    return {
+      content: `No overdue actions found in the imported Follow-up Tracker for **${ctx.project.name}**.\n\nImport an Excel workbook via Documents or the project Import page to load follow-up items.`,
+      references: [],
+    };
+  }
+
+  return {
+    content: `**Overdue actions** from imported Follow-up Tracker on ${ctx.project.name} (${ctx.importedActions.latestFileName ?? "imported workbook"}):\n\n${overdue.map(formatActionLine).join("\n\n")}\n\n**Summary:** ${overdue.length} overdue of ${ctx.importedActions.total} imported actions.`,
+    references,
+  };
+}
+
+function buildImmediateFollowUpResponse(ctx: AiProjectContext): AiGeneratedResponse {
+  const urgent = ctx.importedActions.actions.filter(
+    (action) =>
+      action.isOpen &&
+      (action.isOverdue || action.isHighPriority || action.status === "Overdue")
+  );
+  const references = urgent.map(actionRef);
+
+  if (urgent.length === 0) {
+    return {
+      content: `No items flagged for immediate follow-up in the imported Follow-up Tracker on **${ctx.project.name}**.\n\n${ctx.importedActions.total > 0 ? `All ${ctx.importedActions.total} imported actions appear closed or on track.` : "Upload a Technical Deliverables workbook to populate follow-up data."}`,
+      references: [],
+    };
+  }
+
+  return {
+    content: `**Immediate follow-up required** on ${ctx.project.name}:\n\n${urgent.map(formatActionLine).join("\n\n")}\n\n**Recommendation:** Escalate ${urgent[0]?.reference ?? "top overdue items"} with assigned owners today.`,
+    references,
+  };
+}
+
+function buildResponsiblePartiesResponse(ctx: AiProjectContext): AiGeneratedResponse {
+  const grouped = groupPendingByOwner(resolveProjectId(ctx.project.id));
+  const entries = [...grouped.entries()].sort((a, b) => b[1].length - a[1].length);
+
+  if (entries.length === 0) {
+    return {
+      content: `No pending actions with assigned owners in the imported Follow-up Tracker for **${ctx.project.name}**.\n\n${ctx.importedActions.total === 0 ? "Import an Excel workbook to load action ownership data." : "All imported actions are approved or closed."}`,
+      references: [],
+    };
+  }
+
+  const references = entries.flatMap(([, actions]) => actions.slice(0, 2).map(actionRef));
+
+  const lines = entries.map(
+    ([owner, actions]) =>
+      `• **${owner}** — ${actions.length} pending action(s): ${actions
+        .slice(0, 3)
+        .map((a) => a.reference)
+        .join(", ")}${actions.length > 3 ? "…" : ""}`
+  );
+
+  return {
+    content: `**Responsible parties for pending actions** on ${ctx.project.name}:\n\n${lines.join("\n")}\n\n**Total pending:** ${ctx.importedActions.open} open actions across ${entries.length} owner(s).`,
+    references,
+  };
+}
+
+function buildFollowUpSummaryResponse(ctx: AiProjectContext): AiGeneratedResponse {
+  const { importedActions: stats } = ctx;
+
+  if (stats.total === 0) {
+    return {
+      content: `No imported Follow-up Tracker data available for **${ctx.project.name}** yet.\n\nUpload a JCDC Technical Deliverables Master Log (.xlsx) from the Documents page to import follow-up actions.`,
+      references: [],
+    };
+  }
+
+  const byStatus = stats.actions.reduce<Record<string, number>>((acc, action) => {
+    acc[action.status] = (acc[action.status] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const byPriority = stats.actions.reduce<Record<string, number>>((acc, action) => {
+    acc[action.priority] = (acc[action.priority] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const references = stats.actions.slice(0, 5).map(actionRef);
+
+  return {
+    content: `**Follow-up Tracker summary — ${ctx.project.name}**\n\n**Source:** ${stats.latestFileName ?? "Imported workbook"} (${stats.latestImportedAt ? new Date(stats.latestImportedAt).toLocaleDateString("en-GB") : "recent import"})\n\n**Counts**\n• Total actions: ${stats.total}\n• Open: ${stats.open}\n• Overdue: ${stats.overdue}\n• High/Critical priority: ${stats.highPriority}\n\n**By status**\n${Object.entries(byStatus).map(([status, count]) => `• ${status}: ${count}`).join("\n")}\n\n**By priority**\n${Object.entries(byPriority).map(([priority, count]) => `• ${priority}: ${count}`).join("\n")}\n\n**Sample open items**\n${stats.actions.filter((a) => a.isOpen).slice(0, 5).map(formatActionLine).join("\n") || "• No open items"}`,
+    references,
+  };
+}
+
+function buildTopRisksResponse(ctx: AiProjectContext): AiGeneratedResponse {
+  const risks = getTopImportedRisks(resolveProjectId(ctx.project.id), 5);
+
+  if (risks.length === 0) {
+    return {
+      content: `No risk-ranked items from imported data on **${ctx.project.name}**.\n\nImport a Technical Deliverables workbook to analyse risks from the Follow-up Tracker.`,
+      references: [],
+    };
+  }
+
+  const references = risks.map(actionRef);
+
+  return {
+    content: `**Top 5 risks from imported Follow-up Tracker** (${ctx.importedActions.latestFileName ?? "workbook"}):\n\n${risks.map((action, index) => `${index + 1}. ${formatActionLine(action)}`).join("\n\n")}\n\n**Risk scoring** considers overdue status, priority, open state, and remarks keywords.`,
+    references,
+  };
+}
+
 function buildDefaultResponse(ctx: AiProjectContext, query: string): AiGeneratedResponse {
   const references = [
     ref("Project", ctx.project.id, ctx.project.name, `${ctx.project.progress}% complete`),
@@ -243,8 +385,24 @@ function buildDefaultResponse(ctx: AiProjectContext, query: string): AiGenerated
     ref("Alert", "summary2", "Critical Issues", String(ctx.engineering.kpis.criticalIssues)),
   ];
 
+  if (ctx.importedActions.total > 0) {
+    references.push(
+      ref(
+        "Import",
+        "follow-up",
+        "Imported actions",
+        `${ctx.importedActions.open} open · ${ctx.importedActions.overdue} overdue`
+      )
+    );
+  }
+
+  const importSummary =
+    ctx.importedActions.total > 0
+      ? `\n\n**Imported Follow-up Tracker**\n• ${ctx.importedActions.total} actions · ${ctx.importedActions.open} open · ${ctx.importedActions.overdue} overdue\n• Source: ${ctx.importedActions.latestFileName ?? "Excel import"}`
+      : "";
+
   return {
-    content: `I analysed **${ctx.project.name}** project data for: "${query}"\n\n**Current status**\n• Progress: ${ctx.project.progress}% · Health: ${ctx.project.healthScore}%\n• Open RFIs: ${ctx.engineering.kpis.openRfis} · Pending drawings: ${ctx.engineering.kpis.pendingDrawings}\n• Critical alerts: ${ctx.workspace.criticalAlerts.length}\n\n**Top priorities today**\n${ctx.workspace.todaysPriorities.slice(0, 3).map((p) => `• ${p.title}`).join("\n")}\n\nTry a specific prompt like "Show overdue submittals" or "Generate today's executive report" for detailed analysis with data references.`,
+    content: `I analysed **${ctx.project.name}** project data for: "${query}"\n\n**Current status**\n• Progress: ${ctx.project.progress}% · Health: ${ctx.project.healthScore}%\n• Open RFIs: ${ctx.engineering.kpis.openRfis} · Pending drawings: ${ctx.engineering.kpis.pendingDrawings}\n• Critical alerts: ${ctx.workspace.criticalAlerts.length}${importSummary}\n\n**Top priorities today**\n${ctx.workspace.todaysPriorities.slice(0, 3).map((p) => `• ${p.title}`).join("\n")}\n\nTry a specific prompt like "Which actions are overdue?" or "Summarize the imported follow-up tracker" for imported Excel data.`,
     references,
   };
 }
@@ -257,8 +415,24 @@ function buildPortfolioResponse(
     ref("Attention", item.id, item.title, `${item.project} · ${item.reason}`)
   );
 
+  if (ctx.importedActions.total > 0) {
+    references.push(
+      ref(
+        "Import",
+        "portfolio-actions",
+        "Imported actions",
+        `${ctx.importedActions.total} total · ${ctx.importedActions.overdue} overdue`
+      )
+    );
+  }
+
+  const importBlock =
+    ctx.importedActions.total > 0
+      ? `\n\n**Imported Follow-up Tracker (portfolio)**\n• ${ctx.importedActions.total} actions · ${ctx.importedActions.open} open · ${ctx.importedActions.overdue} overdue\n• Latest import: ${ctx.importedActions.latestFileName ?? "Excel workbook"}`
+      : "";
+
   return {
-    content: `**Portfolio analysis** — ${ctx.projects.length} active projects\n\n${ctx.morningBrief}\n\n**Attention queue**\n${ctx.attentionQueue.map((item) => `• **${item.title}** (${item.project}) — ${item.reason}`).join("\n")}\n\nFor project-specific analysis, open a project workspace or ask about a specific project.\n\nYour query: "${query}"`,
+    content: `**Portfolio analysis** — ${ctx.projects.length} active projects\n\n${ctx.morningBrief}\n\n**Attention queue**\n${ctx.attentionQueue.map((item) => `• **${item.title}** (${item.project}) — ${item.reason}`).join("\n")}${importBlock}\n\nFor project-specific analysis, open a project workspace or ask about a specific project.\n\nYour query: "${query}"`,
     references,
   };
 }
@@ -299,6 +473,64 @@ export function generateProjectResponse(
   if (matches(q, ["drawing", "area a", "area"])) {
     return buildAreaDrawingsResponse(ctx);
   }
+  if (
+    matches(q, [
+      "overdue action",
+      "overdue actions",
+      "actions overdue",
+      "which actions are overdue",
+    ])
+  ) {
+    return buildOverdueActionsResponse(ctx);
+  }
+  if (
+    matches(q, [
+      "immediate follow-up",
+      "immediate follow up",
+      "require follow-up",
+      "require follow up",
+      "follow-up",
+      "follow up",
+    ]) &&
+    !matches(q, ["summarize", "summary"])
+  ) {
+    return buildImmediateFollowUpResponse(ctx);
+  }
+  if (
+    matches(q, [
+      "responsible",
+      "pending action",
+      "pending actions",
+      "who is responsible",
+      "action owner",
+    ])
+  ) {
+    return buildResponsiblePartiesResponse(ctx);
+  }
+  if (
+    matches(q, [
+      "summarize the imported",
+      "summarize imported",
+      "follow-up tracker",
+      "follow up tracker",
+      "imported follow-up",
+      "imported follow up",
+    ])
+  ) {
+    return buildFollowUpSummaryResponse(ctx);
+  }
+  if (
+    matches(q, [
+      "top 5 risk",
+      "top five risk",
+      "top risks",
+      "risks from this file",
+      "risks from the file",
+      "risks from import",
+    ])
+  ) {
+    return buildTopRisksResponse(ctx);
+  }
 
   return buildDefaultResponse(ctx, query);
 }
@@ -328,6 +560,7 @@ export function getProjectContextOrFallback(
       project: fallback,
       workspace,
       engineering: getEngineeringData("amaala"),
+      importedActions: getImportedActionsStats(resolveProjectId("amaala")),
     };
   }
 
