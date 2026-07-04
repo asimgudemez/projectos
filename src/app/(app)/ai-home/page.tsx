@@ -2,7 +2,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { ActivityFeed } from "@/components/ai-home/activity-feed";
 import { CommandBar } from "@/components/ai-home/command-bar";
 import { ExecutiveBrief } from "@/components/ai-home/executive-brief";
-import { HeroSection } from "@/components/ai-home/hero-section";
+import { PortfolioMetrics } from "@/components/ai-home/portfolio-metrics";
 import { PredictionCenter } from "@/components/ai-home/prediction-center";
 import { ProjectPortfolio } from "@/components/ai-home/project-portfolio";
 import { RecommendedAction } from "@/components/ai-home/recommended-action";
@@ -18,13 +18,14 @@ export default function AIHomePage() {
       description="Construction intelligence command center"
       wide
     >
-      <div className="space-y-12 pb-8 lg:space-y-14">
-        <HeroSection />
+      <div className="mx-auto max-w-4xl space-y-16 pb-12 sm:space-y-20">
         <ExecutiveBrief />
-        <CommandBar />
+        <PortfolioMetrics />
         <RecommendedAction />
-        <ProjectPortfolio />
-        <div className="grid gap-12 xl:grid-cols-2 xl:gap-8">
+        <CommandBar />
+
+        <div className="space-y-16 border-t border-white/[0.04] pt-16 sm:space-y-20 sm:pt-20">
+          <ProjectPortfolio />
           <ActivityFeed />
           <PredictionCenter />
         </div>

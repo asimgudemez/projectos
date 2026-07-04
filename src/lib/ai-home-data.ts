@@ -18,11 +18,6 @@ export type KpiMetric = {
   trend: string;
   trendDirection: "up" | "down" | "neutral";
   icon: LucideIcon;
-  accent: string;
-};
-
-export type BriefItem = {
-  text: string;
 };
 
 export type QuickAction = {
@@ -53,6 +48,13 @@ export type RiskPrediction = {
   ringColor: string;
 };
 
+export const executiveBriefItems = [
+  "3 critical issues require attention.",
+  "Procurement package M1 may delay installation.",
+  "6 RFIs are waiting for consultant approval.",
+  "Weekly executive report is ready.",
+];
+
 export const heroKpis: KpiMetric[] = [
   {
     label: "Portfolio Health",
@@ -60,7 +62,6 @@ export const heroKpis: KpiMetric[] = [
     trend: "+4.2% vs last month",
     trendDirection: "up",
     icon: Activity,
-    accent: "from-violet-500/20 to-indigo-500/10",
   },
   {
     label: "Projects",
@@ -68,7 +69,6 @@ export const heroKpis: KpiMetric[] = [
     trend: "3 mobilizing this quarter",
     trendDirection: "neutral",
     icon: FolderKanban,
-    accent: "from-indigo-500/20 to-blue-500/10",
   },
   {
     label: "Critical Issues",
@@ -76,7 +76,6 @@ export const heroKpis: KpiMetric[] = [
     trend: "2 require escalation",
     trendDirection: "down",
     icon: AlertTriangle,
-    accent: "from-rose-500/20 to-orange-500/10",
   },
   {
     label: "Pending RFIs",
@@ -84,15 +83,7 @@ export const heroKpis: KpiMetric[] = [
     trend: "6 overdue consultant reply",
     trendDirection: "down",
     icon: ClipboardList,
-    accent: "from-amber-500/20 to-yellow-500/10",
   },
-];
-
-export const executiveBriefItems: BriefItem[] = [
-  { text: "Procurement package M1 may delay installation." },
-  { text: "Six RFIs require consultant review." },
-  { text: "Weekly executive report is ready." },
-  { text: "One payment certificate becomes due tomorrow." },
 ];
 
 export const quickActions: QuickAction[] = [
@@ -108,10 +99,8 @@ export const quickActions: QuickAction[] = [
 
 export const recommendedAction = {
   title: "Review Pump Delivery Status",
-  impact: "Prevent 5-day delay",
+  impact: "Prevent a 5-day project delay.",
   estimatedTime: "12 minutes",
-  context:
-    "Chilled water pump set for AMAALA Block C is 11 days behind supplier commitment. Early intervention may recover 5 days on the critical path.",
 };
 
 export const portfolioProjects: PortfolioProject[] = [

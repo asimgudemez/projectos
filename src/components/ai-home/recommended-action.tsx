@@ -1,63 +1,43 @@
-import { ArrowRight, Clock, Target, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { recommendedAction } from "@/lib/ai-home-data";
 import { Button } from "@/components/ui/button";
-import { PremiumSurface } from "@/components/ai-home/premium-surface";
 
 export function RecommendedAction() {
   return (
-    <section>
-      <PremiumSurface
-        glow
-        className="overflow-hidden border-violet-500/20 bg-gradient-to-br from-violet-500/[0.08] via-card/90 to-indigo-500/[0.05]"
-      >
-        <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
-              <Zap className="size-3" />
-              Recommended Action
-            </div>
+    <section className="rounded-3xl bg-white/[0.025] px-8 py-10 sm:px-12 sm:py-12">
+      <p className="text-sm font-medium text-violet-400/90">
+        Recommended Action
+      </p>
 
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {recommendedAction.title}
-              </h2>
-              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-                {recommendedAction.context}
-              </p>
-            </div>
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+        {recommendedAction.title}
+      </h2>
 
-            <div className="flex flex-wrap gap-6">
-              <div className="space-y-1">
-                <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  <Target className="size-3" />
-                  Potential Impact
-                </p>
-                <p className="text-lg font-semibold text-emerald-400">
-                  {recommendedAction.impact}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  <Clock className="size-3" />
-                  Estimated Time
-                </p>
-                <p className="text-lg font-semibold text-foreground">
-                  {recommendedAction.estimatedTime}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Button
-            size="lg"
-            className="h-14 w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-8 text-base font-medium text-white shadow-xl shadow-violet-500/25 hover:from-violet-500 hover:to-indigo-500 lg:w-auto"
-          >
-            Start Investigation
-            <ArrowRight className="size-5" data-icon="inline-end" />
-          </Button>
+      <div className="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-12">
+        <div className="space-y-1.5">
+          <p className="text-sm text-muted-foreground">Potential Impact</p>
+          <p className="text-[17px] leading-relaxed text-foreground">
+            {recommendedAction.impact}
+          </p>
         </div>
-      </PremiumSurface>
+        <div className="space-y-1.5">
+          <p className="text-sm text-muted-foreground">Estimated Time</p>
+          <p className="text-[17px] leading-relaxed text-foreground">
+            {recommendedAction.estimatedTime}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <Button
+          size="lg"
+          className="h-12 rounded-full bg-violet-600 px-8 text-[15px] font-medium text-white hover:bg-violet-500"
+        >
+          Start Investigation
+          <ArrowRight className="size-4" data-icon="inline-end" />
+        </Button>
+      </div>
     </section>
   );
 }
