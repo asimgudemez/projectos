@@ -1,10 +1,16 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useRef } from "react";
 import { FileSpreadsheet, Upload } from "lucide-react";
 
 import { EXCEL_ACCEPT, isExcelFile } from "@/lib/import/file-utils";
 import { cn } from "@/lib/utils";
+
+function openFilePicker(input: HTMLInputElement | null, isProcessing: boolean) {
+  if (isProcessing || !input) return;
+  input.value = "";
+  input.click();
+}
 
 type ImportUploadZoneProps = {
   onFileSelected: (file: File) => void;
@@ -21,7 +27,6 @@ export function ImportUploadZone({
   acceptedHint = "JCDC - Technical Deliverables - Master Log (.xlsx, .xls)",
   buttonLabel = "Upload",
 }: ImportUploadZoneProps) {
-  const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -61,11 +66,12 @@ export function ImportUploadZone({
       }}
     >
       <input
-        id={inputId}
         ref={inputRef}
         type="file"
         accept={EXCEL_ACCEPT}
-        className="sr-only"
+        className="hidden"
+        tabIndex={-1}
+        aria-hidden="true"
         disabled={isProcessing}
         onChange={handleInputChange}
       />
@@ -82,22 +88,18 @@ export function ImportUploadZone({
       </p>
       <p className="mt-1 text-xs text-muted-foreground/70">{acceptedHint}</p>
 
-      <label
-        htmlFor={inputId}
-        onClick={(event) => {
-          if (isProcessing) {
-            event.preventDefault();
-          }
-        }}
+      <button
+        type="button"
+        onClick={() => openFilePicker(inputRef.current, isProcessing)}
+        disabled={isProcessing}
         className={cn(
           "mt-6 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white",
-          "transition-colors hover:bg-violet-500",
-          isProcessing && "pointer-events-none opacity-50"
+          "transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
         )}
       >
         <Upload className="size-4" />
         {isProcessing ? "Processing..." : buttonLabel}
-      </label>
+      </button>
     </div>
   );
 }
@@ -110,7 +112,6 @@ export function ImportUploadTrigger({
   buttonLabel = "Upload",
   className,
 }: ImportUploadZoneProps & { className?: string }) {
-  const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -127,26 +128,28 @@ export function ImportUploadTrigger({
   return (
     <>
       <input
-        id={inputId}
         ref={inputRef}
         type="file"
         accept={EXCEL_ACCEPT}
-        className="sr-only"
+        className="hidden"
+        tabIndex={-1}
+        aria-hidden="true"
         disabled={isProcessing}
         onChange={handleInputChange}
       />
-      <label
-        htmlFor={inputId}
+      <button
+        type="button"
+        onClick={() => openFilePicker(inputRef.current, isProcessing)}
+        disabled={isProcessing}
         className={cn(
           "inline-flex cursor-pointer items-center gap-2 rounded-md bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white",
-          "hover:from-violet-500 hover:to-indigo-500",
-          isProcessing && "pointer-events-none opacity-50",
+          "hover:from-violet-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
         <Upload className="size-4" />
         {isProcessing ? "Importing..." : buttonLabel}
-      </label>
+      </button>
     </>
   );
 }
