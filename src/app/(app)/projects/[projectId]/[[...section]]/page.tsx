@@ -4,6 +4,7 @@ import {
   getProjectWorkspace,
   workspaceNavItems,
 } from "@/lib/project-workspace-data";
+import { EngineeringPage } from "@/components/engineering/engineering-page";
 import { ModulePlaceholder } from "@/components/project-workspace/module-placeholder";
 import { OverviewPage } from "@/components/project-workspace/overview-page";
 
@@ -25,6 +26,10 @@ export default async function ProjectSectionPage({
 
   if (sectionId === "overview") {
     return <OverviewPage workspace={workspace} />;
+  }
+
+  if (sectionId === "engineering") {
+    return <EngineeringPage projectId={projectId} />;
   }
 
   const navItem = workspaceNavItems.find((item) => item.id === sectionId);
