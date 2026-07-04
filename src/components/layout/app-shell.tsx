@@ -7,10 +7,17 @@ type AppShellProps = {
   title: string;
   description?: string;
   wide?: boolean;
+  fullWidth?: boolean;
   children: React.ReactNode;
 };
 
-export function AppShell({ title, description, wide, children }: AppShellProps) {
+export function AppShell({
+  title,
+  description,
+  wide,
+  fullWidth,
+  children,
+}: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-background">
       <div className="hidden lg:block">
@@ -22,7 +29,11 @@ export function AppShell({ title, description, wide, children }: AppShellProps) 
         <main className="flex-1 overflow-auto">
           <div
             className={`mx-auto w-full p-4 sm:p-6 lg:p-8 ${
-              wide ? "max-w-[1440px]" : "max-w-7xl"
+              fullWidth
+                ? "max-w-none"
+                : wide
+                  ? "max-w-[1440px]"
+                  : "max-w-7xl"
             }`}
           >
             {children}

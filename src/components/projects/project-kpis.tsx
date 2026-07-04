@@ -53,30 +53,32 @@ export function ProjectKpis({ projects }: ProjectKpisProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-white/[0.06] sm:grid-cols-3 lg:grid-cols-6">
-      {items.map((item) => (
-        <div
-          key={item.label}
-          className="flex flex-col justify-between bg-background px-4 py-4 sm:px-5 sm:py-5"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase">
-              {item.label}
-            </p>
-            <item.icon
-              className={cn("size-3.5 shrink-0 opacity-50", item.accent)}
-            />
-          </div>
-          <p
-            className={cn(
-              "mt-3 text-2xl font-semibold tracking-tight tabular-nums text-foreground",
-              item.accent
-            )}
+    <div className="overflow-hidden rounded-xl bg-white/[0.04] ring-1 ring-white/[0.06]">
+      <div className="grid grid-cols-2 divide-x divide-white/[0.06] md:grid-cols-3 lg:flex lg:divide-x lg:divide-y-0">
+        {items.map((item) => (
+          <div
+            key={item.label}
+            className="flex min-w-0 flex-1 flex-col justify-between px-5 py-4 lg:px-6 lg:py-5"
           >
-            {item.value}
-          </p>
-        </div>
-      ))}
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase">
+                {item.label}
+              </p>
+              <item.icon
+                className={cn("size-3.5 shrink-0 opacity-50", item.accent)}
+              />
+            </div>
+            <p
+              className={cn(
+                "mt-2 text-xl font-semibold tracking-tight tabular-nums text-foreground lg:text-2xl",
+                item.accent
+              )}
+            >
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

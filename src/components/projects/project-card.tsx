@@ -2,10 +2,7 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   BarChart3,
-  Calendar,
-  MapPin,
   Sparkles,
-  User,
 } from "lucide-react";
 
 import {
@@ -21,22 +18,21 @@ type ProjectCardProps = {
   project: Project;
 };
 
-function MetaField({
+function DataCell({
   label,
   value,
-  icon: Icon,
+  className,
 }: {
   label: string;
-  value: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  value: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="space-y-1">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="flex items-center gap-1.5 text-sm text-foreground">
-        {Icon ? <Icon className="size-3 shrink-0 text-muted-foreground" /> : null}
-        <span className="truncate">{value}</span>
+    <div className={cn("min-w-0", className)}>
+      <p className="text-[10px] font-medium tracking-[0.06em] text-muted-foreground uppercase">
+        {label}
       </p>
+      <div className="mt-1 text-sm text-foreground">{value}</div>
     </div>
   );
 }
@@ -47,97 +43,79 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article
       className={cn(
-        "group flex flex-col rounded-2xl bg-white/[0.025] ring-1 ring-white/[0.06] transition-all duration-200",
-        "hover:bg-white/[0.04] hover:ring-white/[0.1]"
+        "flex h-full flex-col rounded-xl bg-white/[0.025] ring-1 ring-white/[0.06]",
+        "transition-colors duration-200 hover:bg-white/[0.035] hover:ring-white/[0.1]"
       )}
     >
-      <div className="flex items-start gap-4 border-b border-white/[0.04] p-5 sm:p-6">
-        <div
-          className={cn(
-            "mt-1 size-2 shrink-0 rounded-full",
-            styles.dot
-          )}
-          aria-label={`Health: ${healthLabels[project.health]}`}
-        />
-
-        <div className="min-w-0 flex-1 space-y-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 space-y-1">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                {project.name}
-              </h2>
-              <p className="text-sm text-muted-foreground">{project.client}</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="ghost" className={cn("text-xs", styles.text)}>
+      <div className="border-b border-white/[0.04] px-5 py-4 lg:px-6 lg:py-5">
+        <div className="flex items-start gap-3">
+          <span
+            aria-hidden
+            className={cn("mt-2 size-2 shrink-0 rounded-full", styles.dot)}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                  {project.name}
+                </h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {project.client}
+                </p>
+              </div>
+              <Badge variant="ghost" className={cn("shrink-0 text-xs", styles.text)}>
                 {healthLabels[project.health]}
               </Badge>
-              <Badge variant="outline" className="border-white/[0.08] text-xs">
-                {project.status}
-              </Badge>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="size-3" />
-              {project.country}
+      <div className="grid flex-1 gap-4 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6 lg:py-5">
+        <DataCell label="Country" value={project.country} />
+        <DataCell label="Contract Value" value={project.contractValueLabel} />
+        <DataCell
+          label="Progress"
+          value={
+            <div className="space-y-2">
+              <span className="font-medium tabular-nums">{project.progress}%</span>
+              <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  className={cn("h-full rounded-full", styles.bar)}
+                  style={{ width: `${project.progress}%` }}
+                />
+              </div>
+            </div>
+          }
+        />
+        <DataCell
+          label="Health"
+          value={
+            <span className={cn("font-medium tabular-nums", styles.text)}>
+              {project.healthScore}%
             </span>
-            <span>{project.contractValueLabel}</span>
-            <span>Risk: {project.riskLevel}</span>
-          </div>
-        </div>
+          }
+        />
+        <DataCell label="Risk" value={project.riskLevel} />
+        <DataCell label="Phase" value={project.currentPhase} />
+        <DataCell label="PM" value={project.projectManager} />
+        <DataCell label="CM" value={project.constructionManager} />
       </div>
 
-      <div className="grid gap-4 p-5 sm:grid-cols-2 sm:gap-5 sm:p-6">
-        <MetaField label="Project Director" value={project.projectDirector} icon={User} />
-        <MetaField
-          label="Construction Manager"
-          value={project.constructionManager}
-          icon={User}
-        />
-        <MetaField label="Current Phase" value={project.currentPhase} />
-        <MetaField
+      <div className="mt-auto border-t border-white/[0.04] px-5 py-4 lg:px-6">
+        <DataCell
           label="Next Milestone"
-          value={`${project.nextMilestone} · ${project.nextMilestoneDate}`}
-          icon={Calendar}
+          value={
+            <span className="text-sm leading-snug">
+              {project.nextMilestone}
+              <span className="text-muted-foreground">
+                {" "}
+                · {project.nextMilestoneDate}
+              </span>
+            </span>
+          }
+          className="mb-4"
         />
-        <MetaField label="Start Date" value={project.startDate} />
-        <MetaField label="Finish Date" value={project.finishDate} />
-      </div>
-
-      <div className="mt-auto space-y-4 border-t border-white/[0.04] p-5 sm:p-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>Progress</span>
-              <span className="tabular-nums text-foreground">
-                {project.progress}%
-              </span>
-            </div>
-            <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
-              <div
-                className={cn("h-full rounded-full transition-all", styles.bar)}
-                style={{ width: `${project.progress}%` }}
-              />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>Health Score</span>
-              <span className={cn("tabular-nums font-medium", styles.text)}>
-                {project.healthScore}%
-              </span>
-            </div>
-            <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
-              <div
-                className={cn("h-full rounded-full transition-all", styles.bar)}
-                style={{ width: `${project.healthScore}%` }}
-              />
-            </div>
-          </div>
-        </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <Link

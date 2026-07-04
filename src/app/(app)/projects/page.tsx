@@ -10,7 +10,7 @@ export default function ProjectsPage() {
     <AppShell
       title="Projects"
       description="Company-wide construction portfolio"
-      wide
+      fullWidth
     >
       <ProjectsView />
     </AppShell>
