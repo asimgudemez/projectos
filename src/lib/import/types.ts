@@ -47,6 +47,8 @@ export type ParsedSheet = {
   rows: RawExcelRow[];
   rowCount: number;
   skippedRows: number;
+  /** First 10 data rows (including header row) for UI preview */
+  previewRows: string[][];
 };
 
 export type ParsedWorkbook = {
@@ -158,6 +160,7 @@ export type ImportInsights = {
 export type ImportBatch = {
   id: UUID;
   fileName: string;
+  fileSizeBytes?: number;
   companyId: UUID;
   projectId: UUID;
   importedAt: string;

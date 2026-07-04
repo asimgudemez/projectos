@@ -98,6 +98,25 @@ function matrixToRows(
   return { headers, rows, skippedRows };
 }
 
+function cellToString(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value).trim();
+}
+
+function buildPreviewRows(matrix: unknown[][], headerRowIndex: number): string[][] {
+  const preview: string[][] = [];
+  const start = headerRowIndex;
+  const end = Math.min(matrix.length, start + 11); // header + up to 10 data rows
+
+  for (let i = start; i < end; i++) {
+    const line = matrix[i] ?? [];
+    preview.push(line.map(cellToString));
+  }
+
+  return preview;
+}
+
 function parseSheet(sheetName: string, sheet: XLSX.WorkSheet): ParsedSheet {
   const mapping = resolveSheetMapping(sheetName);
   const matrix = sheetToMatrix(sheet);
@@ -112,11 +131,13 @@ function parseSheet(sheetName: string, sheet: XLSX.WorkSheet): ParsedSheet {
       rows: [],
       rowCount: 0,
       skippedRows: 0,
+      previewRows: [],
     };
   }
 
   const headerRowIndex = detectHeaderRow(matrix);
   const { headers, rows, skippedRows } = matrixToRows(matrix, headerRowIndex);
+  const previewRows = buildPreviewRows(matrix, headerRowIndex);
 
   return {
     sheetName,
@@ -127,6 +148,7 @@ function parseSheet(sheetName: string, sheet: XLSX.WorkSheet): ParsedSheet {
     rows,
     rowCount: rows.length,
     skippedRows,
+    previewRows,
   };
 }
 

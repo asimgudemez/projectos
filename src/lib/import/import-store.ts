@@ -1,6 +1,8 @@
 import type { UUID } from "@/lib/data/entities";
 import { getMockStore } from "@/lib/data/adapters/mock/mock-store";
 import { NOW } from "@/lib/data/adapters/mock/fixtures/ids";
+import { dispatchImportComplete } from "@/lib/import/import-events";
+import { formatFileSize } from "@/lib/import/file-utils";
 import type {
   ImportBatch,
   ImportPersistencePayload,
@@ -327,9 +329,44 @@ export function applyImportToMockStore(batch: ImportBatch): void {
   }
 }
 
+function registerImportedWorkbook(batch: ImportBatch): void {
+  const store = getMockStore().snapshot;
+  const now = new Date().toISOString();
+  const size = batch.fileSizeBytes ?? 0;
+
+  store.documents.unshift({
+    id: batch.id,
+    companyId: batch.companyId,
+    projectId: batch.projectId,
+    name: batch.fileName,
+    category: "report",
+    fileName: batch.fileName,
+    mimeType: batch.fileName.endsWith(".xls")
+      ? "application/vnd.ms-excel"
+      : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    fileSizeBytes: size,
+    storagePath: `imports/${batch.id}/${batch.fileName}`,
+    storageBucket: "project-documents",
+    version: 1,
+    uploadedAt: now,
+    tags: ["excel-import", "technical-deliverables"],
+    isConfidential: false,
+    description: `Imported ${batch.summary.totalRecords} records from ${batch.summary.totalSheets} sheets (${formatFileSize(size)})`,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
 export function persistImportBatch(batch: ImportBatch): ImportPersistencePayload {
   applyImportToMockStore(batch);
+  registerImportedWorkbook(batch);
   saveImportBatch(batch);
+
+  dispatchImportComplete({
+    fileName: batch.fileName,
+    totalRecords: batch.summary.totalRecords,
+    projectId: batch.projectId,
+  });
 
   return {
     batch,

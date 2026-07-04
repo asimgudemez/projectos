@@ -1,58 +1,73 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useId, useRef } from "react";
 import { FileSpreadsheet, Upload } from "lucide-react";
 
+import { EXCEL_ACCEPT, isExcelFile } from "@/lib/import/file-utils";
 import { cn } from "@/lib/utils";
 
 type ImportUploadZoneProps = {
   onFileSelected: (file: File) => void;
+  onInvalidFile?: () => void;
   isProcessing?: boolean;
   acceptedHint?: string;
+  buttonLabel?: string;
 };
 
 export function ImportUploadZone({
   onFileSelected,
+  onInvalidFile,
   isProcessing = false,
-  acceptedHint = "JCDC - Technical Deliverables - Master Log (.xlsx)",
+  acceptedHint = "JCDC - Technical Deliverables - Master Log (.xlsx, .xls)",
+  buttonLabel = "Upload",
 }: ImportUploadZoneProps) {
+  const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
-  const handleFile = useCallback(
-    (file: File | undefined) => {
-      if (!file) return;
-      if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) return;
-      onFileSelected(file);
-    },
-    [onFileSelected]
-  );
+  function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    if (!isExcelFile(file)) {
+      onInvalidFile?.();
+      return;
+    }
+
+    onFileSelected(file);
+  }
 
   return (
     <div
       className={cn(
         "rounded-xl border border-dashed px-6 py-12 text-center transition-colors",
-        isDragging
-          ? "border-violet-500/50 bg-violet-500/[0.06]"
-          : "border-white/[0.12] bg-white/[0.02] hover:border-white/[0.18] hover:bg-white/[0.03]"
+        "border-white/[0.12] bg-white/[0.02] hover:border-white/[0.18] hover:bg-white/[0.03]"
       )}
       onDragOver={(event) => {
         event.preventDefault();
-        setIsDragging(true);
+        event.stopPropagation();
       }}
-      onDragLeave={() => setIsDragging(false)}
       onDrop={(event) => {
         event.preventDefault();
-        setIsDragging(false);
-        handleFile(event.dataTransfer.files[0]);
+        event.stopPropagation();
+        const file = event.dataTransfer.files?.[0];
+        if (!file) return;
+        if (!isExcelFile(file)) {
+          onInvalidFile?.();
+          return;
+        }
+        onFileSelected(file);
       }}
     >
       <input
+        id={inputId}
         ref={inputRef}
         type="file"
-        accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        className="hidden"
-        onChange={(event) => handleFile(event.target.files?.[0])}
+        accept={EXCEL_ACCEPT}
+        className="sr-only"
+        disabled={isProcessing}
+        onChange={handleInputChange}
       />
 
       <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-violet-500/15">
@@ -63,22 +78,75 @@ export function ImportUploadZone({
         Upload Technical Deliverables Log
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Drop your Excel workbook or click to browse
+        Drop your Excel workbook or use the upload button
       </p>
       <p className="mt-1 text-xs text-muted-foreground/70">{acceptedHint}</p>
 
-      <button
-        type="button"
-        disabled={isProcessing}
-        onClick={() => inputRef.current?.click()}
+      <label
+        htmlFor={inputId}
+        onClick={(event) => {
+          if (isProcessing) {
+            event.preventDefault();
+          }
+        }}
         className={cn(
-          "mt-6 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white",
-          "transition-colors hover:bg-violet-500 disabled:opacity-50"
+          "mt-6 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white",
+          "transition-colors hover:bg-violet-500",
+          isProcessing && "pointer-events-none opacity-50"
         )}
       >
         <Upload className="size-4" />
-        {isProcessing ? "Processing..." : "Select Excel file"}
-      </button>
+        {isProcessing ? "Processing..." : buttonLabel}
+      </label>
     </div>
+  );
+}
+
+/** Compact upload trigger for page headers — opens native file picker. */
+export function ImportUploadTrigger({
+  onFileSelected,
+  onInvalidFile,
+  isProcessing = false,
+  buttonLabel = "Upload",
+  className,
+}: ImportUploadZoneProps & { className?: string }) {
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!isExcelFile(file)) {
+      onInvalidFile?.();
+      return;
+    }
+    onFileSelected(file);
+  }
+
+  return (
+    <>
+      <input
+        id={inputId}
+        ref={inputRef}
+        type="file"
+        accept={EXCEL_ACCEPT}
+        className="sr-only"
+        disabled={isProcessing}
+        onChange={handleInputChange}
+      />
+      <label
+        htmlFor={inputId}
+        className={cn(
+          "inline-flex cursor-pointer items-center gap-2 rounded-md bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white",
+          "hover:from-violet-500 hover:to-indigo-500",
+          isProcessing && "pointer-events-none opacity-50",
+          className
+        )}
+      >
+        <Upload className="size-4" />
+        {isProcessing ? "Importing..." : buttonLabel}
+      </label>
+    </>
   );
 }

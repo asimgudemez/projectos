@@ -145,7 +145,8 @@ export function buildImportBatch(
   workbook: ParsedWorkbook,
   records: NormalizedImportRecord[],
   companyId: string,
-  projectId: string
+  projectId: string,
+  fileSizeBytes?: number
 ): ImportBatch {
   const summary = buildImportSummary(workbook, records);
   const insights = generateImportInsights(records);
@@ -153,6 +154,7 @@ export function buildImportBatch(
   return {
     id: crypto.randomUUID(),
     fileName: workbook.fileName,
+    fileSizeBytes,
     companyId,
     projectId,
     importedAt: new Date().toISOString(),

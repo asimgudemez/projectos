@@ -32,7 +32,8 @@ export async function executeExcelImport(
     workbook,
     records,
     companyId,
-    resolvedProjectId
+    resolvedProjectId,
+    file.size
   );
 
   return persistImportBatch(batch);
