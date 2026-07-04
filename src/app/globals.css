@@ -133,4 +133,27 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  @keyframes command-center-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-command-center-in {
+    animation: command-center-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-command-center-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }

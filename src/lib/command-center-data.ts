@@ -55,7 +55,7 @@ export const executiveBriefItems = [
   "Weekly executive report is ready.",
 ];
 
-export const heroKpis: KpiMetric[] = [
+export const portfolioMetrics: KpiMetric[] = [
   {
     label: "Portfolio Health",
     value: "87%",
@@ -131,33 +131,6 @@ export const portfolioProjects: PortfolioProject[] = [
     nextMilestone: "Station Fit-Out Phase 1",
     milestoneDate: "Jul 25",
   },
-  {
-    name: "Qiddiya Entertainment",
-    location: "Riyadh, KSA",
-    health: 58,
-    progress: 33,
-    status: "Critical",
-    nextMilestone: "Façade Panel Installation",
-    milestoneDate: "Jul 12",
-  },
-  {
-    name: "Diriyah Gate",
-    location: "Diriyah, KSA",
-    health: 84,
-    progress: 56,
-    status: "Healthy",
-    nextMilestone: "Landscape Package Award",
-    milestoneDate: "Jul 30",
-  },
-  {
-    name: "Red Sea Airport",
-    location: "Hanak, KSA",
-    health: 79,
-    progress: 49,
-    status: "At Risk",
-    nextMilestone: "Airfield Lighting Commissioning",
-    milestoneDate: "Aug 08",
-  },
 ];
 
 export const liveActivity: ActivityItem[] = [
@@ -180,16 +153,6 @@ export const liveActivity: ActivityItem[] = [
     time: "12:30",
     title: "Inspection Completed",
     category: "inspection",
-  },
-  {
-    time: "13:05",
-    title: "Submittal REV-03 Returned",
-    category: "document",
-  },
-  {
-    time: "14:18",
-    title: "Payment Certificate PC-07 Issued",
-    category: "approval",
   },
 ];
 
@@ -227,19 +190,19 @@ export const statusStyles: Record<
   { badge: string; bar: string }
 > = {
   Healthy: {
-    badge: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    badge: "bg-emerald-500/10 text-emerald-400",
     bar: "from-emerald-500 to-teal-400",
   },
   "On Track": {
-    badge: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+    badge: "bg-sky-500/10 text-sky-400",
     bar: "from-sky-500 to-indigo-400",
   },
   "At Risk": {
-    badge: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    badge: "bg-amber-500/10 text-amber-400",
     bar: "from-amber-500 to-orange-400",
   },
   Critical: {
-    badge: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+    badge: "bg-rose-500/10 text-rose-400",
     bar: "from-rose-500 to-red-400",
   },
 };

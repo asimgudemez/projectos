@@ -43,7 +43,8 @@ export function AppSidebar({ onNavigate, className }: AppSidebarProps) {
           {mainNavItems.map((item) => {
             const isActive =
               pathname === item.href ||
-              (item.href !== "/ai-home" && pathname.startsWith(item.href));
+              (item.href !== "/command-center" &&
+                pathname.startsWith(item.href));
 
             return (
               <Link

@@ -1,9 +1,9 @@
 import {
   BarChart3,
+  Command,
   FileText,
   FolderKanban,
   Settings,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -16,10 +16,10 @@ export type NavItem = {
 
 export const mainNavItems: NavItem[] = [
   {
-    title: "AI Home",
-    href: "/ai-home",
-    icon: Sparkles,
-    description: "Your intelligent project command center",
+    title: "Command Center",
+    href: "/command-center",
+    icon: Command,
+    description: "Your construction intelligence briefing",
   },
   {
     title: "Projects",

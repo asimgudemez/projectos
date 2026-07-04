@@ -6,6 +6,7 @@ type RiskGaugeProps = {
   color: string;
   ringColor: string;
   size?: number;
+  delay?: number;
   className?: string;
 };
 
@@ -15,15 +16,16 @@ export function RiskGauge({
   color,
   ringColor,
   size = 120,
+  delay = 0,
   className,
 }: RiskGaugeProps) {
-  const strokeWidth = 8;
+  const strokeWidth = 7;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <div className={cn("flex flex-col items-center gap-4", className)}>
+    <div className={cn("flex flex-col items-center gap-3", className)}>
       <div className="relative" style={{ width: size, height: size }}>
         <svg
           width={size}
@@ -49,16 +51,20 @@ export function RiskGauge({
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            className={cn(ringColor, "fill-none transition-all duration-1000 ease-out")}
+            className={cn(
+              ringColor,
+              "fill-none transition-[stroke-dashoffset] duration-1000 ease-out"
+            )}
+            style={{ transitionDelay: `${delay}ms` }}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={cn("text-2xl font-semibold tracking-tight", color)}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={cn("text-xl font-semibold tracking-tight", color)}>
             {value}%
           </span>
         </div>
       </div>
-      <p className="text-center text-sm font-medium text-muted-foreground">
+      <p className="text-center text-xs leading-snug text-muted-foreground">
         {label}
       </p>
     </div>
