@@ -4,6 +4,7 @@ import {
   getProjectWorkspace,
   workspaceNavItems,
 } from "@/lib/project-workspace-data";
+import { ExcelImportPage } from "@/components/import/excel-import-page";
 import { AiAssistantPage } from "@/components/ai-assistant/ai-assistant-page";
 import { EngineeringPage } from "@/components/engineering/engineering-page";
 import { ModulePlaceholder } from "@/components/project-workspace/module-placeholder";
@@ -36,6 +37,15 @@ export default async function ProjectSectionPage({
   if (sectionId === "ai-assistant") {
     return (
       <AiAssistantPage
+        projectId={projectId}
+        projectName={workspace.project.name}
+      />
+    );
+  }
+
+  if (sectionId === "import") {
+    return (
+      <ExcelImportPage
         projectId={projectId}
         projectName={workspace.project.name}
       />

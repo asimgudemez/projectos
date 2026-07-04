@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   ClipboardCheck,
   FileText,
+  FileSpreadsheet,
   HardHat,
   LayoutGrid,
   Package,
@@ -24,6 +25,7 @@ export type WorkspaceNavId =
   | "hse"
   | "commercial"
   | "documents"
+  | "import"
   | "ai-assistant"
   | "settings";
 
@@ -94,6 +96,12 @@ export const workspaceNavItems: WorkspaceNavItem[] = [
     label: "Documents",
     icon: FileText,
     href: (id) => `/projects/${id}/documents`,
+  },
+  {
+    id: "import",
+    label: "Excel Import",
+    icon: FileSpreadsheet,
+    href: (id) => `/projects/${id}/import`,
   },
   {
     id: "settings",
