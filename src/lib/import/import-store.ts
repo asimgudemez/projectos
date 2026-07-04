@@ -1,4 +1,4 @@
-import type { UUID } from "@/lib/data/entities";
+import type { TaskStatus, UUID } from "@/lib/data/entities";
 import { getMockStore } from "@/lib/data/adapters/mock/mock-store";
 import { NOW } from "@/lib/data/adapters/mock/fixtures/ids";
 import { dispatchImportComplete } from "@/lib/import/import-events";
@@ -8,6 +8,7 @@ import type {
   ImportPersistencePayload,
   ImportedMaterialRecord,
   ImportedSubmittalRecord,
+  ImportedTaskRecord,
   NormalizedImportRecord,
   SupabaseInsertBatch,
 } from "@/lib/import/types";
@@ -286,23 +287,49 @@ export function applyImportToMockStore(batch: ImportBatch): void {
         break;
 
       case "task":
-      case "design_change":
+      case "design_change": {
+        const taskRecord = record as ImportedTaskRecord;
+        const owner = taskRecord.actionOwner ?? record.responsibleParty;
+        const importStatus = record.status;
+        const taskStatus: TaskStatus =
+          importStatus === "Approved" || importStatus === "Closed"
+            ? "done"
+            : importStatus === "Overdue"
+              ? "blocked"
+              : importStatus === "Under Review"
+                ? "in_progress"
+                : "todo";
+
+        const tags =
+          record.module === "task"
+            ? ["excel-import", "follow-up-tracker"]
+            : ["excel-import", "design-change"];
+
         store.tasks.push({
           id: record.importId,
           companyId: record.companyId,
           projectId: record.projectId,
           reference: record.reference,
           title: record.title,
-          status: record.status === "Approved" ? "done" : "todo",
+          description: [
+            owner ? `Owner: ${owner}` : null,
+            record.remarks ? `Remarks: ${record.remarks}` : null,
+            `Import status: ${importStatus}`,
+            `Source: ${record.sourceSheet} row ${record.sourceRow}`,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+          status: taskStatus,
           priority: record.priority,
           assigneeId: null,
-          dueDate: record.dueDate,
+          dueDate: taskRecord.followUpDate ?? record.dueDate,
           module: record.module,
-          tags: ["excel-import"],
+          tags,
           createdAt: now,
           updatedAt: now,
         });
         break;
+      }
 
       case "letter":
         store.documents.push({
