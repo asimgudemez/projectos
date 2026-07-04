@@ -2,13 +2,14 @@ import { notFound } from "next/navigation";
 
 import { getProjectWorkspace } from "@/lib/project-workspace-data";
 import { AppShell } from "@/components/layout/app-shell";
-import { ProjectWorkspaceView } from "@/components/project-workspace/project-workspace-view";
+import { ProjectWorkspaceShell } from "@/components/project-workspace/project-workspace-shell";
 
-type ProjectWorkspacePageProps = {
+type ProjectLayoutProps = {
   params: Promise<{ projectId: string }>;
+  children: React.ReactNode;
 };
 
-export async function generateMetadata({ params }: ProjectWorkspacePageProps) {
+export async function generateMetadata({ params }: ProjectLayoutProps) {
   const { projectId } = await params;
   const workspace = getProjectWorkspace(projectId);
 
@@ -19,9 +20,10 @@ export async function generateMetadata({ params }: ProjectWorkspacePageProps) {
   };
 }
 
-export default async function ProjectWorkspacePage({
+export default async function ProjectLayout({
   params,
-}: ProjectWorkspacePageProps) {
+  children,
+}: ProjectLayoutProps) {
   const { projectId } = await params;
   const workspace = getProjectWorkspace(projectId);
 
@@ -32,10 +34,12 @@ export default async function ProjectWorkspacePage({
   return (
     <AppShell
       title={workspace.project.name}
-      description={`${workspace.project.client} · Workspace`}
+      description={`${workspace.project.client} · Project Workspace`}
       fullWidth
     >
-      <ProjectWorkspaceView workspace={workspace} />
+      <ProjectWorkspaceShell workspace={workspace}>
+        {children}
+      </ProjectWorkspaceShell>
     </AppShell>
   );
 }
