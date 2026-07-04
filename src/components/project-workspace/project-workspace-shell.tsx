@@ -60,6 +60,7 @@ export function ProjectWorkspaceShell({
         <nav className="flex gap-1 overflow-x-auto px-2 py-3 lg:flex-col lg:overflow-visible lg:px-3 lg:py-4">
           {workspaceNavItems.map((item) => {
             const isActive = activeNav === item.id;
+            const isAi = item.id === "ai-assistant";
 
             return (
               <Link
@@ -68,11 +69,20 @@ export function ProjectWorkspaceShell({
                 className={cn(
                   "flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
                   isActive
-                    ? "bg-white/[0.06] font-medium text-foreground"
-                    : "text-muted-foreground hover:bg-white/[0.03] hover:text-foreground"
+                    ? isAi
+                      ? "bg-violet-500/15 font-medium text-violet-300"
+                      : "bg-white/[0.06] font-medium text-foreground"
+                    : isAi
+                      ? "text-violet-400/80 hover:bg-violet-500/10 hover:text-violet-300"
+                      : "text-muted-foreground hover:bg-white/[0.03] hover:text-foreground"
                 )}
               >
-                <item.icon className="size-4 shrink-0 opacity-70" />
+                <item.icon
+                  className={cn(
+                    "size-4 shrink-0 opacity-70",
+                    isAi && !isActive && "text-violet-400"
+                  )}
+                />
                 {item.label}
               </Link>
             );

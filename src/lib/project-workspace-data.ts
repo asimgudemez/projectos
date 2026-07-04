@@ -42,6 +42,12 @@ export const workspaceNavItems: WorkspaceNavItem[] = [
     href: (id) => `/projects/${id}`,
   },
   {
+    id: "ai-assistant",
+    label: "AI Assistant",
+    icon: Bot,
+    href: (id) => `/projects/${id}/ai-assistant`,
+  },
+  {
     id: "planning",
     label: "Planning",
     icon: CalendarRange,
@@ -88,12 +94,6 @@ export const workspaceNavItems: WorkspaceNavItem[] = [
     label: "Documents",
     icon: FileText,
     href: (id) => `/projects/${id}/documents`,
-  },
-  {
-    id: "ai-assistant",
-    label: "AI Assistant",
-    icon: Bot,
-    href: (id) => `/projects/${id}/ai-assistant`,
   },
   {
     id: "settings",

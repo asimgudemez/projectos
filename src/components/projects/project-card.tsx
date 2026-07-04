@@ -128,13 +128,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
             Open Workspace
             <ArrowUpRight className="size-3.5" data-icon="inline-end" />
           </Link>
-          <Button
-            variant="outline"
-            className="h-9 flex-1 border-white/[0.08] bg-transparent hover:bg-white/[0.04]"
+          <Link
+            href={`/projects/${project.id}/ai-assistant`}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "default" }),
+              "h-9 flex-1 border-white/[0.08] bg-transparent hover:bg-white/[0.04]"
+            )}
           >
             <Sparkles className="size-3.5" data-icon="inline-start" />
             AI Summary
-          </Button>
+          </Link>
           <Button
             variant="outline"
             className="h-9 flex-1 border-white/[0.08] bg-transparent hover:bg-white/[0.04]"

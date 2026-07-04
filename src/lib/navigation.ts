@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bot,
   Command,
   FileText,
   FolderKanban,
@@ -15,6 +16,12 @@ export type NavItem = {
 };
 
 export const mainNavItems: NavItem[] = [
+  {
+    title: "AI Assistant",
+    href: "/ai",
+    icon: Bot,
+    description: "Construction intelligence grounded in project data",
+  },
   {
     title: "Command Center",
     href: "/command-center",

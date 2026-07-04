@@ -4,6 +4,7 @@ import {
   getProjectWorkspace,
   workspaceNavItems,
 } from "@/lib/project-workspace-data";
+import { AiAssistantPage } from "@/components/ai-assistant/ai-assistant-page";
 import { EngineeringPage } from "@/components/engineering/engineering-page";
 import { ModulePlaceholder } from "@/components/project-workspace/module-placeholder";
 import { OverviewPage } from "@/components/project-workspace/overview-page";
@@ -30,6 +31,15 @@ export default async function ProjectSectionPage({
 
   if (sectionId === "engineering") {
     return <EngineeringPage projectId={projectId} />;
+  }
+
+  if (sectionId === "ai-assistant") {
+    return (
+      <AiAssistantPage
+        projectId={projectId}
+        projectName={workspace.project.name}
+      />
+    );
   }
 
   const navItem = workspaceNavItems.find((item) => item.id === sectionId);

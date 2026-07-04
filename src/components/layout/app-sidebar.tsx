@@ -43,7 +43,8 @@ export function AppSidebar({ onNavigate, className }: AppSidebarProps) {
           {mainNavItems.map((item) => {
             const isActive =
               pathname === item.href ||
-              (item.href !== "/command-center" &&
+              (item.href !== "/ai" &&
+                item.href !== "/command-center" &&
                 pathname.startsWith(item.href));
 
             return (
@@ -76,14 +77,18 @@ export function AppSidebar({ onNavigate, className }: AppSidebarProps) {
       <Separator className="bg-sidebar-border" />
 
       <div className="p-4">
-        <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
-          <p className="text-xs font-medium text-sidebar-foreground">
-            AI Operating System
+        <Link
+          href="/ai"
+          onClick={onNavigate}
+          className="block rounded-xl border border-violet-500/20 bg-violet-500/[0.08] p-3 transition-colors hover:bg-violet-500/[0.12]"
+        >
+          <p className="text-xs font-medium text-violet-300">
+            AI Construction Assistant
           </p>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Never be surprised again. Predict project risks before they happen.
+            Ask about RFIs, submittals, manpower, and get executive reports.
           </p>
-        </div>
+        </Link>
       </div>
     </aside>
   );
