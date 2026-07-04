@@ -1,208 +1,270 @@
-import {
-  Activity,
-  AlertTriangle,
-  Banknote,
-  Calendar,
-  ClipboardList,
-  FileText,
-  FolderKanban,
-  Package,
-  ShieldAlert,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+export type AttentionPriority = "critical" | "high" | "medium";
 
-export type KpiMetric = {
-  label: string;
-  value: string;
-  trend: string;
-  trendDirection: "up" | "down" | "neutral";
-  icon: LucideIcon;
+export type AttentionItem = {
+  id: string;
+  title: string;
+  project: string;
+  reason: string;
+  priority: AttentionPriority;
 };
 
-export type QuickAction = {
+export type DecisionItem = {
+  id: string;
   label: string;
-  icon: LucideIcon;
+  project: string;
+  meta?: string;
 };
 
-export type PortfolioProject = {
+export type ProjectStatus = "healthy" | "at-risk" | "critical";
+
+export type ProjectSnapshot = {
+  id: string;
   name: string;
-  location: string;
   health: number;
-  progress: number;
-  status: "Healthy" | "At Risk" | "Critical" | "On Track";
-  nextMilestone: string;
-  milestoneDate: string;
+  status: ProjectStatus;
 };
 
-export type ActivityItem = {
+export type OperationItem = {
+  id: string;
+  label: string;
+  project: string;
+  detail: string;
+};
+
+export type MeetingItem = {
+  id: string;
   time: string;
   title: string;
-  category: "approval" | "document" | "ai" | "inspection";
+  project?: string;
+  location?: string;
 };
 
-export type RiskPrediction = {
-  label: string;
-  value: number;
-  color: string;
-  ringColor: string;
+export const workspaceContext = {
+  greeting: "Good morning, Asim",
+  dateLabel: "Saturday, 4 July",
+  syncLabel: "Portfolio synced 2m ago",
+  activeProjects: 12,
+  attentionCount: 3,
+  decisionsCount: 6,
 };
 
-export const executiveBriefItems = [
-  "3 critical issues require attention.",
-  "Procurement package M1 may delay installation.",
-  "6 RFIs are waiting for consultant approval.",
-  "Weekly executive report is ready.",
-];
+export const morningBrief =
+  "Overnight: 2 RFIs received consultant responses. AMAALA chilled-water pump delivery is 11 days behind supplier commitment. Payment certificate PC-07 for NEOM Oxagon is due today. Three submittals and one variation order require your signature before noon.";
 
-export const portfolioMetrics: KpiMetric[] = [
+export const attentionQueue: AttentionItem[] = [
   {
-    label: "Portfolio Health",
-    value: "87%",
-    trend: "+4.2% vs last month",
-    trendDirection: "up",
-    icon: Activity,
+    id: "att-1",
+    title: "Pump delivery at risk",
+    project: "AMAALA Block C",
+    reason: "May cause 5-day delay on critical path",
+    priority: "critical",
   },
   {
-    label: "Projects",
-    value: "12",
-    trend: "3 mobilizing this quarter",
-    trendDirection: "neutral",
-    icon: FolderKanban,
+    id: "att-2",
+    title: "RFI-218 overdue",
+    project: "Qiddiya Entertainment",
+    reason: "Consultant response 4 days past due",
+    priority: "high",
   },
   {
-    label: "Critical Issues",
-    value: "3",
-    trend: "2 require escalation",
-    trendDirection: "down",
-    icon: AlertTriangle,
+    id: "att-3",
+    title: "Manpower below target",
+    project: "Red Sea Airport",
+    reason: "MEP crew at 68% of planned headcount",
+    priority: "high",
   },
   {
-    label: "Pending RFIs",
-    value: "14",
-    trend: "6 overdue consultant reply",
-    trendDirection: "down",
-    icon: ClipboardList,
+    id: "att-4",
+    title: "Concrete supply constraint",
+    project: "NEOM Oxagon",
+    reason: "Batch plant allocation reduced this week",
+    priority: "medium",
   },
 ];
 
-export const quickActions: QuickAction[] = [
-  { label: "Today's Risks", icon: ShieldAlert },
-  { label: "Generate Report", icon: FileText },
-  { label: "Review RFIs", icon: ClipboardList },
-  { label: "Procurement", icon: Package },
-  { label: "Cash Flow", icon: Banknote },
-  { label: "Schedule", icon: Calendar },
-  { label: "Cost", icon: TrendingUp },
-  { label: "Documents", icon: FileText },
-];
-
-export const recommendedAction = {
-  title: "Review Pump Delivery Status",
-  impact: "Prevent a 5-day project delay.",
-  estimatedTime: "12 minutes",
+export const decisionsToday = {
+  approve: [
+    {
+      id: "ap-1",
+      label: "Submittal REV-04 — Façade panels",
+      project: "AMAALA",
+      meta: "Due by 12:00",
+    },
+    {
+      id: "ap-2",
+      label: "Shop drawings PKG-2 — HVAC",
+      project: "Riyadh Metro Line 3",
+      meta: "Consultant cleared",
+    },
+    {
+      id: "ap-3",
+      label: "Variation Order VO-112",
+      project: "Diriyah Gate",
+      meta: "SAR 840K",
+    },
+  ] as DecisionItem[],
+  pay: [
+    {
+      id: "py-1",
+      label: "Payment Certificate PC-07",
+      project: "NEOM Oxagon",
+      meta: "SAR 2.4M · Due today",
+    },
+    {
+      id: "py-2",
+      label: "Retention release — MEP package",
+      project: "AMAALA",
+      meta: "SAR 620K",
+    },
+  ] as DecisionItem[],
+  review: [
+    {
+      id: "rv-1",
+      label: "Weekly executive report",
+      project: "Portfolio",
+      meta: "Ready for sign-off",
+    },
+    {
+      id: "rv-2",
+      label: "Procurement exception M1",
+      project: "AMAALA",
+      meta: "Installation impact",
+    },
+  ] as DecisionItem[],
 };
 
-export const portfolioProjects: PortfolioProject[] = [
+export const projectSnapshots: ProjectSnapshot[] = [
+  { id: "p1", name: "AMAALA", health: 87, status: "healthy" },
+  { id: "p2", name: "NEOM Oxagon", health: 72, status: "at-risk" },
+  { id: "p3", name: "Riyadh Metro L3", health: 91, status: "healthy" },
+  { id: "p4", name: "Qiddiya", health: 58, status: "critical" },
+  { id: "p5", name: "Diriyah Gate", health: 84, status: "healthy" },
+  { id: "p6", name: "Red Sea Airport", health: 79, status: "at-risk" },
+];
+
+export const rfisWaiting = {
+  total: 14,
+  overdue: 6,
+  items: [
+    {
+      id: "rfi-1",
+      label: "RFI-214",
+      project: "AMAALA",
+      detail: "Awaiting structural consultant",
+    },
+    {
+      id: "rfi-2",
+      label: "RFI-218",
+      project: "Qiddiya",
+      detail: "4 days overdue",
+    },
+    {
+      id: "rfi-3",
+      label: "RFI-221",
+      project: "NEOM Oxagon",
+      detail: "MEP coordination",
+    },
+  ] as OperationItem[],
+};
+
+export const materialsMissing = {
+  total: 8,
+  items: [
+    {
+      id: "mat-1",
+      label: "Chilled water pumps",
+      project: "AMAALA",
+      detail: "11 days behind PO date",
+    },
+    {
+      id: "mat-2",
+      label: "Façade panel batch 4",
+      project: "Qiddiya",
+      detail: "Customs clearance pending",
+    },
+    {
+      id: "mat-3",
+      label: "Switchgear panel SG-07",
+      project: "Red Sea Airport",
+      detail: "Factory test delayed",
+    },
+  ] as OperationItem[],
+};
+
+export const manpowerGaps = {
+  total: 3,
+  items: [
+    {
+      id: "mp-1",
+      label: "MEP crew",
+      project: "Red Sea Airport",
+      detail: "68% of planned headcount",
+    },
+    {
+      id: "mp-2",
+      label: "Steel fixers",
+      project: "NEOM Oxagon",
+      detail: "74% of planned headcount",
+    },
+    {
+      id: "mp-3",
+      label: "Façade installers",
+      project: "Qiddiya",
+      detail: "61% of planned headcount",
+    },
+  ] as OperationItem[],
+};
+
+export const meetingsToday: MeetingItem[] = [
   {
-    name: "AMAALA",
-    location: "Red Sea, KSA",
-    health: 87,
-    progress: 64,
-    status: "Healthy",
-    nextMilestone: "MEP Rough-In Complete",
-    milestoneDate: "Jul 18",
+    id: "mt-1",
+    time: "09:00",
+    title: "Executive standup",
+    location: "Boardroom A",
   },
   {
-    name: "NEOM Oxagon",
-    location: "Tabuk Province, KSA",
-    health: 72,
-    progress: 41,
-    status: "At Risk",
-    nextMilestone: "Structural Topping Out",
-    milestoneDate: "Aug 02",
+    id: "mt-2",
+    time: "11:30",
+    title: "Consultant sync",
+    project: "AMAALA",
+    location: "Teams",
   },
   {
-    name: "Riyadh Metro Line 3",
-    location: "Riyadh, KSA",
-    health: 91,
-    progress: 78,
-    status: "On Track",
-    nextMilestone: "Station Fit-Out Phase 1",
-    milestoneDate: "Jul 25",
+    id: "mt-3",
+    time: "14:00",
+    title: "PC review board",
+    project: "NEOM Oxagon",
+    location: "Finance suite",
+  },
+  {
+    id: "mt-4",
+    time: "16:30",
+    title: "Procurement escalation",
+    project: "Qiddiya",
+    location: "Site office",
   },
 ];
 
-export const liveActivity: ActivityItem[] = [
-  {
-    time: "09:10",
-    title: "RFI-214 Approved",
-    category: "approval",
-  },
-  {
-    time: "10:42",
-    title: "Shop Drawing Uploaded",
-    category: "document",
-  },
-  {
-    time: "11:15",
-    title: "AI detected procurement risk",
-    category: "ai",
-  },
-  {
-    time: "12:30",
-    title: "Inspection Completed",
-    category: "inspection",
-  },
+export const liveSignals = [
+  { time: "06:42", text: "RFI-214 approved by consultant" },
+  { time: "06:18", text: "Shop drawing uploaded — Metro L3" },
+  { time: "05:55", text: "AI flagged pump delivery slippage" },
 ];
 
-export const riskPredictions: RiskPrediction[] = [
-  {
-    label: "Schedule Risk",
-    value: 68,
-    color: "text-amber-400",
-    ringColor: "stroke-amber-400",
-  },
-  {
-    label: "Budget Risk",
-    value: 42,
-    color: "text-emerald-400",
-    ringColor: "stroke-emerald-400",
-  },
-  {
-    label: "Quality Risk",
-    value: 31,
-    color: "text-sky-400",
-    ringColor: "stroke-sky-400",
-  },
-  {
-    label: "Safety Risk",
-    value: 24,
-    color: "text-violet-400",
-    ringColor: "stroke-violet-400",
-  },
-];
+export const statusLabels: Record<ProjectStatus, string> = {
+  healthy: "Healthy",
+  "at-risk": "At risk",
+  critical: "Critical",
+};
 
-export const aiConfidence = 92;
+export const statusDot: Record<ProjectStatus, string> = {
+  healthy: "bg-emerald-400",
+  "at-risk": "bg-amber-400",
+  critical: "bg-rose-400",
+};
 
-export const statusStyles: Record<
-  PortfolioProject["status"],
-  { badge: string; bar: string }
-> = {
-  Healthy: {
-    badge: "bg-emerald-500/10 text-emerald-400",
-    bar: "from-emerald-500 to-teal-400",
-  },
-  "On Track": {
-    badge: "bg-sky-500/10 text-sky-400",
-    bar: "from-sky-500 to-indigo-400",
-  },
-  "At Risk": {
-    badge: "bg-amber-500/10 text-amber-400",
-    bar: "from-amber-500 to-orange-400",
-  },
-  Critical: {
-    badge: "bg-rose-500/10 text-rose-400",
-    bar: "from-rose-500 to-red-400",
-  },
+export const priorityDot: Record<AttentionPriority, string> = {
+  critical: "bg-rose-400",
+  high: "bg-amber-400",
+  medium: "bg-muted-foreground/50",
 };
